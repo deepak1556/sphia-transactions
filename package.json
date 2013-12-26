@@ -1,0 +1,13 @@
+{
+  "name": "sphia-transaction",
+  "version": "0.0.1",
+  "repo": "deepak1556/sphia-transaction",
+  "description": "Batch operations with Sphia",
+  "keywords": [ "sophia", "sphiaplugin", "cli" ],
+  "license": "MIT",
+  "install": "make install",
+  "dependencies": {
+  	"clibs/commander": "*",
+  	"jwerle/repl.h": "*"
+  }
+}
