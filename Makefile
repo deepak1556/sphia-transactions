@@ -8,7 +8,7 @@ CFLAGS += -fvisibility=hidden -D_BSD_SOURCE
 LDFLAGS = -pthread -lsophia
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(BIN)
+	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $(BIN)
 
 install: $(BIN)
 	mkdir -p $(PREFIX)/bin

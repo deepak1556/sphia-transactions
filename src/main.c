@@ -1,36 +1,12 @@
-#include "sphia-macro/sphia-macro.h"
+#include "sphia-macro.h"
 #include "commander/commander.h"
-#include "repl/repl.h"
-#include <sp.h>
+#include "srepl.h"
 
 static void *env;
 static void *db;
 static char path[256];
 
 char *err = NULL;
-
-// Defines a database instance and the path it points to.
-typedef struct {
-  char path[256];
-  void *db;
-  void *env;
-} sphia_t;
-
-repl_session_opts opts;
-
-static char *
-eval (repl_session_t *, char *);
-
-static void
-print (repl_session_t *, char *);
-
-static void
-error (repl_session_t *, char *);
-
-static void
-set_path(command_t *self) {
-  strcpy(path, self->arg);
-}
 
 static int
 transaction_init(sphia_t *sphia) {
@@ -39,7 +15,15 @@ transaction_init(sphia_t *sphia) {
 
     if (NULL == db) {
       SPHIA_FERROR(sp_error(env));
-      SPHIA_DESTROY(env);
+      SPHIA_DESTROY(env) {
+
+        return 1;
+
+      } SPHIA_CATCH(err, env) {
+
+        SPHIA_FERROR(err);
+        return 1;
+      }
       return 1;
     } else {
       sphia->db = db;
@@ -48,8 +32,6 @@ transaction_init(sphia_t *sphia) {
       if (-1 == sp_begin(db)) {
         SPHIA_FERROR(sp_error(env));
         return 1;
-      } else {
-        return 0;
       }
     }
 
@@ -57,28 +39,10 @@ transaction_init(sphia_t *sphia) {
 
     SPHIA_FERROR(err);
     return 1;
+
   }
 
-}
-
-static int
-srepl_init (sphia_t *sphia) {
-  int rc = 0;
-
-  opts.prompt = "sphia>";
-  opts.eval_cb = eval;
-  opts.print_cb = print;
-  opts.error_cb = error;
-
-  // initiate
-  repl_session_t *sess = repl_session_new(&opts);
-
-  // start
-  rc = repl_session_start(sess);
-
-  // destroy
-  repl_session_destroy(sess);
-  return rc;
+  return 0;
 }
 
 int
@@ -112,29 +76,4 @@ main(int argc, char *argv[]) {
   sp_destroy(db);
   sp_destroy(env);
   return 0;
-}
-
-static void
-print (repl_session_t *sess, char *buf) {
-  fprintf(sess->stdout, "%s\n", buf);
-  repl_loop(sess);
-}
-
-static void
-error (repl_session_t *sess, char *err) {
-  fprintf(sess->stderr, "error: '%s'\n", err);
-  repl_loop(sess);
-}
-
-static char *
-eval (repl_session_t *sess, char *buf) {
-  if (feof(sess->stdin)) {
-    sess->rc = 0;
-    return NULL;
-  }
-
-
-  printf("%s\n", buf);
-
-  return NULL;
 }
