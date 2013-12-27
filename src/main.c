@@ -126,7 +126,7 @@ main(int argc, char *argv[]) {
 
   if (0 != (rc = transaction_init(sphia))) return rc;
 
-  if(0 != (rc = srepl_init(sphia))) return rc;
+  if(0 != (rc = srepl_init(sphia, cmds, opts))) return rc;
 
   sp_destroy(sphia->db);
   sp_destroy(sphia->env);
