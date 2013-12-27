@@ -1,8 +1,7 @@
 
 BIN    ?= sphia-transaction
 PREFIX ?= /usr/local
-SRC     = $(wildcard src/*.c)
-SRC    += $(wildcard deps/*/*.c)
+SRC     = $(wildcard deps/*/*.c src/*.c)
 CFLAGS  = -std=c99 -Ideps -Wall -Wextra -fPIC
 CFLAGS += -fvisibility=hidden -D_BSD_SOURCE
 LDFLAGS = -pthread -lsophia

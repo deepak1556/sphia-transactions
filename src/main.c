@@ -1,17 +1,17 @@
+#include <sophia.h>
+#include <sp.h>
 #include "sphia-macro.h"
-#include "commander/commander.h"
-#include "srepl.h"
+#include "srepl.h" 
 
-static void *env;
-static void *db;
-static char path[256];
+void *db;
+void *env;
 
 char *err = NULL;
 
 static int
 transaction_init(sphia_t *sphia) {
 
-  SPHIA_DB_OPEN(env, db, path, SPO_CREAT|SPO_RDWR) {
+  SPHIA_DB_OPEN(env, db, sphia->path, SPO_CREAT|SPO_RDWR) {
 
     if (NULL == db) {
       SPHIA_FERROR(sp_error(env));
@@ -28,7 +28,8 @@ transaction_init(sphia_t *sphia) {
     } else {
       sphia->db = db;
       sphia->env = env;
-      srtcpy(sphia->path, path);
+      free(db);
+      free(env);
       if (-1 == sp_begin(db)) {
         SPHIA_FERROR(sp_error(env));
         return 1;
@@ -47,33 +48,36 @@ transaction_init(sphia_t *sphia) {
 
 int
 main(int argc, char *argv[]) {
-  command_t program;
-  command_init(&program
-    , "sphia-begin"
-    , "0.0.1");
-  command_option(&program
-    , "-p"
-    , "--path <path>"
-    , "path to database"
-    , set_path);
-  command_parse(&program, argc, argv);
+  int rc;
+  char *prgname = argv[0];
+  sphia_t *sphia = malloc(sizeof(sphia_t));
 
-  if (0 == strlen(path)) {
-    char *default_path = getenv("SPHIA_PATH");
-    if (NULL != default_path) {
-      strcpy(path, default_path);
-    } else {
-      strcpy(path, ".");
+  while(argc > 2) {
+    argc--;
+    argv++;
+    if(!strcmp(*argv, "--path")) {
+      argv++;
+      strcpy(sphia->path, *argv);
+    }else {
+      fprintf(stderr, "Usage: %s [--path]\n", prgname);
+      exit(1);
     }
   }
 
-  int rc;
-  sphia_t *sphia = malloc(sizeof(sphia_t));
+  if (0 == strlen(sphia->path)) {
+    char *default_path = getenv("SPHIA_PATH");
+    if (NULL != default_path) {
+      strcpy(sphia->path, default_path);
+    } else {
+      strcpy(sphia->path, ".");
+    }
+  }
+
   if (0 != (rc = transaction_init(sphia))) return rc;
 
   if(0 != (rc = srepl_init(sphia))) return rc;
 
-  sp_destroy(db);
-  sp_destroy(env);
+  sp_destroy(sphia->db);
+  sp_destroy(sphia->env);
   return 0;
 }

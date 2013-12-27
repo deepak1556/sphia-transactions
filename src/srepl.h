@@ -1,6 +1,8 @@
 #ifndef SPHIA_REPL_H
 #define SPHIA_REPL_H 1
 
+#include "linenoise/linenoise.h"
+
 // Defines a database instance and the path it points to.
 typedef struct {
   char path[256];
