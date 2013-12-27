@@ -1,7 +1,7 @@
 {
   "name": "sphia-transaction",
   "version": "0.0.1",
-  "repo": "deepak1556/sphia-transaction",
+  "repo": "sphia/sphia-transactions",
   "description": "Batch operations with Sphia",
   "keywords": [ "sophia", "sphiaplugin", "cli" ],
   "license": "MIT",
