@@ -35,4 +35,8 @@
 #define SPHIA_DESTROY(o)                                  \
   if (0 == sp_destroy(o))
 
+#define GEN_CMD(name)                                      \
+  static int cmd_##name (sphia_t *, opt_t *);              \
+  static int cmd_##name (sphia_t *sphia, opt_t *opts)       
+
 #endif

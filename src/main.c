@@ -8,6 +8,56 @@ void *env;
 
 char *err = NULL;
 
+GEN_CMD(begin) {
+  int rc = sp_begin(sphia->db);
+  if(rc == 0) {
+    printf("Transaction initialised");
+  }else if(rc == 1) {
+    printf("Transaction under process");
+  }else {
+    SPHIA_FERROR(sp_error(sphia->env));
+    return 1;
+  }
+
+  return 0;
+}
+
+GEN_CMD(set) {
+  if(opts->key != NULL && opts->value != NULL) {
+    int rc = sp_set(sphia->db, &opts->key, strlen(opts->key) + 1, &opts->value, strlen(opts->value) + 1);
+    if(rc == 0) {
+      printf("Currently in queue");
+    }else {
+      SPHIA_FERROR(sp_error(sphia->env));
+      return 1;
+    }
+  }else {
+    printf("Invalid or too few arguements");
+    return 1;
+  }
+
+  return 0;
+}
+
+GEN_CMD(commit) {
+  int rc = sp_commit(sphia->db);
+  if(rc != 0) {
+    SPHIA_FERROR(sp_error(sphia->env));
+    return 1;
+  }else {
+    printf("Batch operations completed");
+  }
+
+  return 0;
+}
+
+static cmd_t cmds[] = {
+  {"begin", NULL, cmd_begin}, 
+  {"set", NULL, cmd_set},
+  {"commit", NULL, cmd_commit}
+};
+
+
 static int
 transaction_init(sphia_t *sphia) {
 
@@ -51,6 +101,7 @@ main(int argc, char *argv[]) {
   int rc;
   char *prgname = argv[0];
   sphia_t *sphia = malloc(sizeof(sphia_t));
+  opt_t *opts = malloc(sizeof(opt_t));
 
   while(argc > 2) {
     argc--;
@@ -79,5 +130,8 @@ main(int argc, char *argv[]) {
 
   sp_destroy(sphia->db);
   sp_destroy(sphia->env);
+  free(sphia);
+  free(opts);
+  
   return 0;
 }
