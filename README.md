@@ -8,6 +8,7 @@ A sphia plugin that allows transactions in sophiaDB
 with [clib](https://github.com/clibs) do,
 
 ```
+clib install sphia/sphia-transactions
 ```
 
 with git do,
